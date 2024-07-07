@@ -53,7 +53,6 @@ while len(exclude) < len(starts):
     if st.endswith("Z") and e not in exclude:
       endings.append(steps)
       exclude.append(e)
-print(endings)
 
 import math 
 print(math.lcm(*endings))
