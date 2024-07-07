@@ -40,39 +40,37 @@
 # print(s)
 
 # part two 
-def find_adjacent_numbers(r, c, numbers):
-    adjacent = []
-    for num, (row, length, col) in numbers.items():
-        if (r-1 <= row <= r+1) and (col-1 <= c <= col+length):
-            adjacent.append(num)
-    return adjacent
+lines = [line.strip() for line in open("input.txt").readlines()]
+s = 0
+def validPositions(r, c):
+    oob = lambda r, c: (r >= 0 and r < len(lines)) and (c >= 0 and c < len(lines[0])) and lines[r][c].isdigit()
+    positions = [
+        (r-1, c-1), (r-1, c), (r-1, c+1),
+        (r, c-1),             (r, c+1),
+        (r+1, c-1), (r+1, c), (r+1, c+1)
+    ]
+    return [pos for pos in positions if oob(*pos)]
 
-lines = [line.strip() for line in open("input.txt", 'r').readlines()]
-rows, cols = len(lines), len(lines[0])
-
-numbers = {}
-symbols = []
+def findDigit(r,c):
+  left = ""
+  right = ""
+  ptr = c
+  while ptr < len(lines[0]) and lines[r][ptr].isdigit() :
+      right += lines[r][ptr]      
+      ptr += 1
+  ptr = c - 1
+  while ptr > -1 and lines[r][ptr].isdigit():
+      left += lines[r][ptr]      
+      ptr -= 1
+  return int(left[::-1] + right)
 
 for r, row in enumerate(lines):
-    buffer = ""
-    for c, char in enumerate(row):
-        if char.isdigit():
-            buffer += char
-        else:
-            if buffer:
-                numbers[int(buffer)] = (r, len(buffer), c - len(buffer))
-                buffer = ""
-            if char == '*':
-                symbols.append((r, c))
-    if buffer:
-        numbers[int(buffer)] = (r, len(buffer), cols - len(buffer))
+  buffer = ""
+  for i, c in enumerate(row):
+    if c == "*":
+      valid = validPositions(r,i)
+      nums = set(findDigit(*pos) for pos in valid)
+      if len(nums) == 2:
+        s += list(nums)[0] * list(nums)[1]
 
-total_gear_ratio = 0
-
-for r, c in symbols:
-    adjacent_nums = find_adjacent_numbers(r, c, numbers)
-    if len(adjacent_nums) == 2:
-        gear_ratio = adjacent_nums[0] * adjacent_nums[1]
-        total_gear_ratio += gear_ratio
-
-print(total_gear_ratio)
+print(s)

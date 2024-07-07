@@ -1,46 +1,50 @@
-from dataclasses import dataclass
+lines = [line.strip() for line in open("input.txt").readlines()]
 
-@dataclass
-class Map:
-  dest: int
-  source: int
-  l: int
+seeds = lines[0][lines[0].find(":")+2:].split(' ')
+seeds = list(map(int, seeds))
+maps = []
 
-@dataclass
-class Group:
-  maps: list
-  def addMap(self, dest, source, l):
-    self.maps.append(Map(dest, source, l))
-  def map(self, input):
-    for map in self.maps:
-      if input >= map.source and input <= map.source+map.l:
-        print(map.dest + (input - map.source))
-        return map.dest + (input - map.source) 
-    return input
+def process_buffer(buffer):
+  buffer = buffer[1:]
+  m = []
+  for group in buffer:
+    if group == '': continue
+    dest, source, range = group.split(' ')
+    m.append(
+      list(map(int, (dest, source, range)))
+    )
+  if len(m) > 0:
+    maps.append(m) 
 
-def parse_input():
-  lines = [line.strip() for line in open("input.txt").readlines() if line.strip() != ""]
-  seeds = list(map(int,lines[0][lines[0].find(":")+1:].strip().split(' ')))
-  groups = []
+buffer = []
+for line in lines[1:]:
+  if ":" in line:
+    # processs 
+    process_buffer(buffer)
+    buffer = []
+    pass
+  buffer.append(line)
+process_buffer(buffer)
 
-  buffer = []
-  for line in lines[2:]:
-    buffer.append(line)
-    if ":" in line:
-      g = Group(maps=[])
-      for m in buffer[:-1]:
-        dest, source, l = m.split(' ')
-        g.addMap(int(dest), int(source), int(l))
-      groups.append(g)
-      buffer = []
-  
-  return seeds, groups
+finals = []
+# for seed in seeds:
+#   for section in maps:
+#     for dest, source, r in section:
+#       if seed in range(source, source+r+1):
+#         seed = dest + (seed - source)
+#         break
+#   finals.append(seed)
 
-seeds, groups = parse_input()
-res = []
-for seed in [79]:
-  for g in groups:
-    seed = g.map(seed)
-  res.append(seed)
+# print(min(finals))
 
-print(min(res))
+# part two
+for i in range(0, len(seeds)-1, 2):
+  st, r = seeds[i:i+2]
+  for seed in range(st, st+r):
+    for section in maps:
+      for dest, source, r in section:
+        if seed in range(source, source+r+1):
+          seed = dest + (seed - source)
+          break
+    finals.append(seed)
+print(min(finals))
